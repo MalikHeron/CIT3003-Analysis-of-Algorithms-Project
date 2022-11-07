@@ -9,16 +9,19 @@ names = {}
 # Maps person_ids to a dictionary of: name, birth, movies (a set of movie_ids)
 people = {}
 
-# Maps movie_ids to a dictionary of: first, last, activity
+# Maps activities to a set of activity_ids
+activityList = {}
+
+# Maps activities to a dictionary of: names
 activities = {}
 
 
-def load_data(directory):
+def load_data():
     """
     Load data from CSV files into memory.
     """
     # Load people
-    with open(f"{directory}/people.csv") as file:
+    with open("res/people.csv") as file:
         reader = csv.DictReader(file)
         counter = 0
         for row in reader:
@@ -43,7 +46,7 @@ def load_data(directory):
                 names[name.lower()].add(counter)
 
     # Load activities
-    with open(f"{directory}/activities.csv") as file:
+    with open("res/activities.csv") as file:
         reader = csv.DictReader(file)
         counter = 0
         for row in reader:
@@ -53,18 +56,21 @@ def load_data(directory):
             # Form name string
             name = row["first"] + " " + row["last"]
 
-            if name.lower() not in activities:
-                activities[name.lower()] = {row["activity"]}
+            if row["activity"] not in activities:
+                activities[row["activity"]] = {name}
             else:
-                activities[name.lower()].add(row["activity"])
+                activity = list(activities.get(row["activity"], set()))
+                for person in activity:
+                    if person != name:
+                        activities[row["activity"]].add(name)
+                    else:
+                        print(f"Duplicate: {name} at {counter}")
 
 
 def main():
-    directory = "res"
-
     # Load data from files into memory
     print("Loading data...")
-    load_data(directory)
+    load_data()
     print("Data loaded.")
 
     source = person_id_for_name(input("Name: "))
@@ -126,9 +132,9 @@ def shortest_path(source, target):
         explored.add(node.state)
 
         # Add neighbors to frontier
-        for movie, state in neighbors_for_person(node.state):
+        for activity, state in neighbors_for_person(node.state):
             if not frontier.contains_state(state) and state not in explored:
-                child = Node(state=state, parent=node, action=movie)
+                child = Node(state=state, parent=node, action=activity)
 
                 # If node is the goal, then we have a solution
                 if child.state == target:
@@ -144,7 +150,7 @@ def shortest_path(source, target):
 
 def person_id_for_name(name):
     """
-    Returns the IMDB id for a person's name,
+    Returns the id for a person's name,
     resolving ambiguities as needed.
     """
     person_ids = list(names.get(name.lower(), set()))
@@ -180,18 +186,35 @@ def neighbors_for_person(person_id):
     Returns (activities_id, person_id) pairs for people
     who starred with a given person.
     """
-    privacy = people[person_id]["privacy"]
-    if privacy == "Y":
+    person = people[person_id]
+    if person["privacy"] == "Y":
         print("Privacy Requested")
         sys.exit(0)
     else:
-        name = people[person_id]["first"] + " " + people[person_id]["last"]
-        activities_ids = activities[name]["activity"]
-        neighbors = set()
-        for movie_id in activities_ids:
-            for person_id in activities[movie_id]["stars"]:
-                neighbors.add((movie_id, person_id))
-        return neighbors
+        name = person["name"]
+        if name.lower() in activities:
+            activities_ids = list(activities.get(name.lower(), set()))
+            print(f"{activities_ids}")
+            neighbors = set()
+            for activity_id in activities_ids:
+                for person_id in activities[activity_id]["stars"]:
+                    neighbors.add((activity_id, person_id))
+            return neighbors
+        else:
+            print(f"{name} has no activities")
+            sys.exit(0)
+
+        # if name.lower() in activities:
+        #    person_ids = list(names.get(name.lower(), set()))
+        #    for person_id in person_ids:
+        #        person = people[person_id]
+        #        activities_ids = list((activities.get(person["name"], set())))
+        #        print(f"{activities_ids}")
+        #    neighbors = set()
+        #    for activity_id in activities_ids:
+        #        for person_id in activities[name.lower()]["activity"]:
+        #            neighbors.add((activity_id, person_id))
+        #    return neighbors
 
 
 if __name__ == "__main__":

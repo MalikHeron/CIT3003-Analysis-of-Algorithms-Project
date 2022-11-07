@@ -1,6 +1,8 @@
 # Six Degrees of Separation
 
-In this project, I implement a search algorithm that finds the shortest path between any two actors by choosing a sequence of movies that connects them. This project is based on implementations from https://github.com/priyanktejani/degrees and https://github.com/alireza-mahmoodi/Six_Degrees_of_Kevin_Bacon.git
+In this project, we are required to implement an algorithm that finds the degrees of separation between two persons and recommend to each person’s close contact, all the activities that the person is engaged in.
+
+This project is based on implementations from https://github.com/priyanktejani/degrees and https://github.com/alireza-mahmoodi/Six_Degrees_of_Kevin_Bacon.git
 
 # The Code in Action
 

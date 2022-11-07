@@ -9,8 +9,8 @@ names = {}
 # Maps person_ids to a dictionary of: name, birth, movies (a set of movie_ids)
 people = {}
 
-# Maps movie_ids to a dictionary of: title, year, stars (a set of person_ids)
-movies = {}
+# Maps movie_ids to a dictionary of: first, last, activity
+activities = {}
 
 
 def load_data(directory):
@@ -18,44 +18,49 @@ def load_data(directory):
     Load data from CSV files into memory.
     """
     # Load people
-    with open(f"{directory}/people.csv") as f:
-        reader = csv.DictReader(f)
+    with open(f"{directory}/people.csv") as file:
+        reader = csv.DictReader(file)
+        counter = 0
         for row in reader:
-            people[row["id"]] = {
-                "name": row["name"],
-                "birth": row["birth"],
-                "movies": set()
+            # Increase counter
+            counter += 1
+
+            # Form name string
+            name = row["first"] + " " + row["last"]
+            people[counter] = {
+                "name": name,
+                "phone": row["phone"],
+                "email": row["email"],
+                "community": row["community"],
+                "school": row["school"],
+                "employer": row["employer"],
+                "privacy": row["privacy"]
             }
-            if row["name"].lower() not in names:
-                names[row["name"].lower()] = {row["id"]}
+
+            if name.lower() not in names:
+                names[name.lower()] = {counter}
             else:
-                names[row["name"].lower()].add(row["id"])
+                names[name.lower()].add(counter)
 
-    # Load movies
-    with open(f"{directory}/movies.csv") as f:
-        reader = csv.DictReader(f)
+    # Load activities
+    with open(f"{directory}/activities.csv") as file:
+        reader = csv.DictReader(file)
+        counter = 0
         for row in reader:
-            movies[row["id"]] = {
-                "title": row["title"],
-                "year": row["year"],
-                "stars": set()
-            }
+            # Increase counter
+            counter += 1
 
-    # Load stars
-    with open(f"{directory}/stars.csv") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            try:
-                people[row["person_id"]]["movies"].add(row["movie_id"])
-                movies[row["movie_id"]]["stars"].add(row["person_id"])
-            except KeyError:
-                pass
+            # Form name string
+            name = row["first"] + " " + row["last"]
+
+            if name.lower() not in activities:
+                activities[name.lower()] = {row["activity"]}
+            else:
+                activities[name.lower()].add(row["activity"])
 
 
 def main():
-    if len(sys.argv) > 2:
-        sys.exit("Usage: python degrees.py [directory]")
-    directory = sys.argv[1] if len(sys.argv) == 2 else "res"
+    directory = "res"
 
     # Load data from files into memory
     print("Loading data...")
@@ -80,13 +85,13 @@ def main():
         for i in range(degrees):
             person1 = people[path[i][1]]["name"]
             person2 = people[path[i + 1][1]]["name"]
-            movie = movies[path[i + 1][0]]["title"]
+            movie = activities[path[i + 1][0]]["title"]
             print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
 
 def shortest_path(source, target):
     """
-    Returns the shortest list of (movie_id, person_id) pairs
+    Returns the shortest list of (activity_id, person_id) pairs
     that connect the source to the target.
 
     If no possible path, returns None.
@@ -150,10 +155,17 @@ def person_id_for_name(name):
         for person_id in person_ids:
             person = people[person_id]
             name = person["name"]
-            birth = person["birth"]
-            print(f"ID: {person_id}, Name: {name}, Birth: {birth}")
+            phone = person["phone"]
+            email = person["email"]
+            community = person["community"]
+            school = person["school"]
+            employer = person["employer"]
+            privacy = person["privacy"]
+
+            print(f"ID: {person_id}, Name: {name}, Phone: {phone}, Email: {email}, Community: {community}, "
+                  f"School: {school}, Employer: {employer}, Privacy: {privacy}")
         try:
-            person_id = input("Intended Person ID: ")
+            person_id = int(input("Intended Person ID: "))
             if person_id in person_ids:
                 return person_id
         except ValueError:
@@ -165,15 +177,21 @@ def person_id_for_name(name):
 
 def neighbors_for_person(person_id):
     """
-    Returns (movie_id, person_id) pairs for people
+    Returns (activities_id, person_id) pairs for people
     who starred with a given person.
     """
-    movie_ids = people[person_id]["movies"]
-    neighbors = set()
-    for movie_id in movie_ids:
-        for person_id in movies[movie_id]["stars"]:
-            neighbors.add((movie_id, person_id))
-    return neighbors
+    privacy = people[person_id]["privacy"]
+    if privacy == "Y":
+        print("Privacy Requested")
+        sys.exit(0)
+    else:
+        name = people[person_id]["first"] + " " + people[person_id]["last"]
+        activities_ids = activities[name]["activity"]
+        neighbors = set()
+        for movie_id in activities_ids:
+            for person_id in activities[movie_id]["stars"]:
+                neighbors.add((movie_id, person_id))
+        return neighbors
 
 
 if __name__ == "__main__":

@@ -2,6 +2,8 @@
 
 In this project, we are required to implement an algorithm that finds the degrees of separation between two persons and recommend to each person’s close contact, all the activities that the person is engaged in.
 
+Please refer to the Project Outline for more information.
+
 This project is based on implementations from https://github.com/priyanktejani/degrees and https://github.com/alireza-mahmoodi/Six_Degrees_of_Kevin_Bacon.git
 
 # The Code in Action

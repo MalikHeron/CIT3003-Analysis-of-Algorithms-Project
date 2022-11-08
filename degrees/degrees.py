@@ -91,7 +91,10 @@ def main():
         print("Not connected.")
     else:
         degrees = len(path)
-        print(f"{degrees} degrees of separation.")
+        if degrees == 1:
+            print(f"\n{degrees} degree of separation.")
+        elif degrees > 1:
+            print(f"\n{degrees} degrees of separation.")
 
         # Add source number to path array
         path = [source] + path

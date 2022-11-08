@@ -76,12 +76,12 @@ def main():
     print("Data loaded.")
 
     # Get name of source person
-    source = person_id_for_name(input("Name: "))
+    source = get_person_id(input("Name: "))
     if source is None:
         sys.exit("Person not found.")
 
     # Get name of targeted person
-    target = person_id_for_name(input("Name: "))
+    target = get_person_id(input("Name: "))
     if target is None:
         sys.exit("Person not found.")
 
@@ -148,7 +148,7 @@ def shortest_path(source, target):
             sys.exit(0)
 
         # Add neighbors to frontier
-        for state in contacts_for_person(node.state):
+        for state in get_contacts(node.state):
             if not frontier.contains_state(state) and state not in explored:
                 child = Node(state=state, parent=node, action=None)
 
@@ -164,7 +164,7 @@ def shortest_path(source, target):
                 frontier.add(child)
 
 
-def person_id_for_name(name):
+def get_person_id(name):
     """
     Returns the id for a person's name, resolving ambiguities as needed.
     """
@@ -196,7 +196,7 @@ def person_id_for_name(name):
         return person_ids[0]
 
 
-def contacts_for_person(person_id):
+def get_contacts(person_id):
     """
     Returns (person_id) for people who are close contacts with a given person.
     """

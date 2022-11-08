@@ -123,6 +123,7 @@ def shortest_path(source, target):
     if source == target:
         return []
 
+    # Keep track of the number of degrees
     counter = 0
 
     # Keep looping until solution found
@@ -143,7 +144,7 @@ def shortest_path(source, target):
 
         # Check if loop runs 6 times already
         if counter > 6:
-            print(f"More than 6 degrees of separation")
+            print("More than 6 degrees of separation")
             sys.exit(0)
 
         # Add neighbors to frontier
@@ -214,11 +215,15 @@ def get_contacts(person_id):
     if source_privacy == "Y":
         print(f"No recommendations to close contacts, {source_name} requested privacy")
 
-    contacts = set()
+    close_contacts = set()
     have_activities = bool
-    for index in names:
-        person_ids = list(names.get(index, set()))
+    for name in names:
+        # Get list of ids for particular name
+        person_ids = list(names.get(name, set()))
+
+        # Iterate through ids
         for person_id in person_ids:
+            # Get contact information
             person = people[person_id]
             contact_name = person["name"]
             contact_community = person["community"]
@@ -226,14 +231,15 @@ def get_contacts(person_id):
             contact_employer = person["employer"]
             contact_privacy = person["privacy"]
 
+            # Check if contact is a close contact
             if source_community == contact_community and source_school == contact_school \
                     or source_employer == contact_employer:
                 # For storing recommendations
                 recommendations = list()
+                # Activities source does
                 source_activities = list(activities.get(source_name.lower(), set()))
-                # print(f"Source: {source_name}, Activities: {source_activities}")
+                # Activities target does
                 target_activities = list(activities.get(contact_name.lower(), set()))
-                # print(f"Contact: {contact_name}, Activities: {target_activities}")
 
                 if source_privacy != "Y":
                     if contact_privacy != "Y":
@@ -242,16 +248,18 @@ def get_contacts(person_id):
                             for activity in source_activities:
                                 if activity not in target_activities:
                                     if activity not in recommendations:
+                                        # Add activity to recommendations
                                         recommendations.append(f"{source_name} {activity}")
                             # Check for recommendations
                             if recommendations:
                                 print(f"Recommendations to {contact_name}: {recommendations}")
                         else:
                             have_activities = False
-                contacts.add(person_id)
+                # Add contact to close contacts
+                close_contacts.add(person_id)
     if not have_activities:
         print(f"{source_name} has no activities")
-    return contacts
+    return close_contacts
 
 
 if __name__ == "__main__":

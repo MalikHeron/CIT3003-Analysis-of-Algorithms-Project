@@ -142,11 +142,6 @@ def shortest_path(source, target):
 
         counter += 1
 
-        # Check if loop runs 6 times already
-        if counter > 6:
-            print("More than 6 degrees of separation")
-            sys.exit(0)
-
         # Add neighbors to frontier
         for state in get_contacts(node.state):
             if not frontier.contains_state(state) and state not in explored:

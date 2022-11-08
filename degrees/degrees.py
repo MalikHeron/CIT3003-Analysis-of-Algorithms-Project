@@ -216,6 +216,7 @@ def contacts_for_person(person_id):
         print(f"No recommendations to close contacts, {source_name} requested privacy")
 
     contacts = set()
+    have_activities = bool
     for index in names:
         person_ids = list(names.get(index, set()))
         for person_id in person_ids:
@@ -246,7 +247,11 @@ def contacts_for_person(person_id):
                             # Check for recommendations
                             if recommendations:
                                 print(f"Recommendations to {contact_name}: {recommendations}")
+                        else:
+                            have_activities = False
                 contacts.add(person_id)
+    if not have_activities:
+        print(f"{source_name} has no activities")
     return contacts
 
 

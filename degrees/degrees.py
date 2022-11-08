@@ -126,9 +126,6 @@ def shortest_path(source, target):
     if source == target:
         return []
 
-    # Keep track of the number of degrees
-    counter = 0
-
     # Keep looping until solution found
     while True:
 
@@ -142,8 +139,6 @@ def shortest_path(source, target):
 
         # Mark node as explored
         explored.add(node.state)
-
-        counter += 1
 
         # Add neighbors to frontier
         for state in get_contacts(node.state):

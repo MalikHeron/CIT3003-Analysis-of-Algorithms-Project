@@ -57,20 +57,23 @@ def load_data():
             # Form name string
             name = row["first"] + " " + row["last"]
 
-            if row["activity"] not in activities:
-                activities[row["activity"]] = {name.lower()}
-
+            # Add unique activities to a list
+            if row["activity"] not in activities_list:
                 # Increase counter
                 activity_counter += 1
-                # Add unique activities to a list
+
                 activities_list[row["activity"]] = activity_counter
+
+            # Form list with name as key
+            if name.lower() not in activities:
+                activities[name.lower()] = {row["activity"]}
             else:
-                activity = list(activities.get(row["activity"], set()))
-                for person in activity:
-                    if person != name:
-                        activities[row["activity"]].add(name.lower())
+                activity = list(activities.get(name.lower(), set()))
+                for index in activity:
+                    if index != row["activity"]:
+                        activities[name.lower()].add(row["activity"])
                     # else:
-                    #    print(f"Duplicate: {name} at {counter}")
+                    #    print(f"Duplicate: {row['activity']} at {name}")
 
 
 def main():
@@ -93,10 +96,10 @@ def main():
     else:
         degrees = len(path)
         print(f"{degrees} degrees of separation.")
-        path = [(None, source)] + path
+        path = [source] + path
         for i in range(degrees):
-            person1 = people[path[i][1]]["name"]
-            person2 = people[path[i + 1][1]]["name"]
+            person1 = people[path[i]]["name"]
+            person2 = people[path[i + 1]]["name"]
             print(f"{i + 1}: {person1} is a close contact of {person2}")
 
 
@@ -141,21 +144,20 @@ def shortest_path(source, target):
         counter += 1
 
         if counter > 6:
-            print("More than 6 degrees of separation")
+            print(f"More than 6 degrees of separation")
             sys.exit(0)
 
         # Add neighbors to frontier
-        for activity, state in neighbors_for_person(node.state):
-            # print(f"Activity: {activity}, ID: {state}")
+        for state in neighbors_for_person(node.state):
             if not frontier.contains_state(state) and state not in explored:
-                child = Node(state=state, parent=node, action=activity)
+                child = Node(state=state, parent=node, action=None)
 
                 # If node is the goal, then we have a solution
                 if child.state == target:
                     node = child
                     path = []
                     while node.parent is not None:
-                        path.append((node.action, node.state))
+                        path.append(node.state)
                         node = node.parent
                     path.reverse()
                     return path
@@ -187,9 +189,6 @@ def person_id_for_name(name):
         try:
             person_id = int(input("Intended Person ID: "))
             if person_id in person_ids:
-                if people[person_id]["privacy"] == "Y":
-                    print(f"Connection cannot be established, {people[person_id]['name']} requested privacy")
-                    sys.exit(0)
                 return person_id
         except ValueError:
             pass
@@ -207,40 +206,43 @@ def neighbors_for_person(person_id):
     source_community = source["community"]
     source_school = source["school"]
     source_employer = source["employer"]
+    source_name = source["name"]
+    source_privacy = source["privacy"]
+    print(f"Person: {source_name}")
+    if source_privacy == "Y":
+        print(f"No recommendations to close contacts, {source_name} requested privacy")
 
-    if source["privacy"] == "Y":
-        print(f"Connection cannot be established, {source['name']} requested privacy")
-        sys.exit(0)
-    else:
-        source_name = source["name"]
-        print(f"Person: {source_name}")
-        contacts = set()
-        recommendations = {}
-        for index in names:
-            person_ids = list(names.get(index, set()))
-            for person_id in person_ids:
-                person = people[person_id]
-                name = person["name"]
-                community = person["community"]
-                school = person["school"]
-                employer = person["employer"]
-                privacy = person["privacy"]
+    contacts = set()
+    for index in names:
+        person_ids = list(names.get(index, set()))
+        for person_id in person_ids:
+            person = people[person_id]
+            contact_name = person["name"]
+            contact_community = person["community"]
+            contact_school = person["school"]
+            contact_employer = person["employer"]
+            contact_privacy = person["privacy"]
 
-                if source_community == community and source_school == school or source_employer == employer:
-                    if privacy != "Y":
-                        for activity in activities_list:
-                            persons = list(activities.get(activity, set()))
-                            if source_name.lower() in persons:
-                                if name.lower() not in persons:
-                                    if name.lower() not in recommendations:
-                                        recommendations[activity] = {name.lower()}
-                                        contacts.add((activities_list[activity], person_id))
-                        # print(f"Contact found: {person['name']}")
-                    # else:
-                    #
-        rec_activity = recommendations.items()
-        print(f"Recommendations to close contacts: {rec_activity}")
-        return contacts
+            if source_community == contact_community and source_school == contact_school \
+                    or source_employer == contact_employer:
+                # For storing recommendations
+                recommendations = list()
+                source_activities = list(activities.get(source_name.lower(), set()))
+                # print(f"Source: {source_name}, Activities: {source_activities}")
+                target_activities = list(activities.get(contact_name.lower(), set()))
+                # print(f"Contact: {contact_name}, Activities: {target_activities}")
+
+                if source_privacy != "Y":
+                    if contact_privacy != "Y":
+                        for activity in source_activities:
+                            if activity not in target_activities:
+                                # print(f"Activity not in target: {activity}")
+                                if activity not in recommendations:
+                                    activity_id = activities_list.get(activity)
+                                    recommendations.append(f"{source_name} {activity}")
+                        print(f"Recommendations to {contact_name}: {recommendations}")
+                contacts.add(person_id)
+    return contacts
 
 
 if __name__ == "__main__":

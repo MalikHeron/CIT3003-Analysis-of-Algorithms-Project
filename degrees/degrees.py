@@ -97,8 +97,7 @@ def main():
         for i in range(degrees):
             person1 = people[path[i][1]]["name"]
             person2 = people[path[i + 1][1]]["name"]
-            # movie = activities[path[i + 1][0]]["title"]
-            print(f"{i + 1}: {person1} and {person2} share ")
+            print(f"{i + 1}: {person1} is a close contact of {person2}")
 
 
 def shortest_path(source, target):
@@ -216,26 +215,31 @@ def neighbors_for_person(person_id):
         source_name = source["name"]
         print(f"Person: {source_name}")
         contacts = set()
-        for activity in activities_list:
-            persons = list(activities.get(activity, set()))
-            if source_name.lower() in persons:
-                for index in names:
-                    person_ids = list(names.get(index, set()))
-                    for person_id in person_ids:
-                        person = people[person_id]
-                        name = person["name"]
-                        community = person["community"]
-                        school = person["school"]
-                        employer = person["employer"]
-                        privacy = person["privacy"]
+        recommendations = {}
+        for index in names:
+            person_ids = list(names.get(index, set()))
+            for person_id in person_ids:
+                person = people[person_id]
+                name = person["name"]
+                community = person["community"]
+                school = person["school"]
+                employer = person["employer"]
+                privacy = person["privacy"]
 
-                        if source_community == community or source_school == school or source_employer == employer:
-                            if privacy != "Y":
+                if source_community == community and source_school == school or source_employer == employer:
+                    if privacy != "Y":
+                        for activity in activities_list:
+                            persons = list(activities.get(activity, set()))
+                            if source_name.lower() in persons:
                                 if name.lower() not in persons:
-                                    contacts.add((activities_list[activity], person_id))
-                                # print(f"Contact found: {person['name']}")
-                            # else:
-                            # print(f"{person['name']} exists")
+                                    if name.lower() not in recommendations:
+                                        recommendations[activity] = {name.lower()}
+                                        contacts.add((activities_list[activity], person_id))
+                        # print(f"Contact found: {person['name']}")
+                    # else:
+                    #
+        rec_activity = recommendations.items()
+        print(f"Recommendations to close contacts: {rec_activity}")
         return contacts
 
 

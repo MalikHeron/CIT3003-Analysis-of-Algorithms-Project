@@ -9,8 +9,8 @@ names = {}
 # Maps person_ids to a dictionary of: name, birth, movies (a set of movie_ids)
 people = {}
 
-# Maps activities to a set of activity_ids
-activityList = {}
+# Maps activities to an id
+activities_list = {}
 
 # Maps activities to a dictionary of: names
 activities = {}
@@ -49,6 +49,7 @@ def load_data():
     with open("res/activities.csv") as file:
         reader = csv.DictReader(file)
         counter = 0
+        activity_counter = 0
         for row in reader:
             # Increase counter
             counter += 1
@@ -57,14 +58,19 @@ def load_data():
             name = row["first"] + " " + row["last"]
 
             if row["activity"] not in activities:
-                activities[row["activity"]] = {name}
+                activities[row["activity"]] = {name.lower()}
+
+                # Increase counter
+                activity_counter += 1
+                # Add unique activities to a list
+                activities_list[row["activity"]] = activity_counter
             else:
                 activity = list(activities.get(row["activity"], set()))
                 for person in activity:
                     if person != name:
-                        activities[row["activity"]].add(name)
-                    else:
-                        print(f"Duplicate: {name} at {counter}")
+                        activities[row["activity"]].add(name.lower())
+                    # else:
+                    #    print(f"Duplicate: {name} at {counter}")
 
 
 def main():
@@ -133,7 +139,7 @@ def shortest_path(source, target):
 
         # Add neighbors to frontier
         for activity, state in neighbors_for_person(node.state):
-            if not frontier.contains_state(state) and state not in explored:
+            if not frontier.contains_state(activity) and activity not in explored:
                 child = Node(state=state, parent=node, action=activity)
 
                 # If node is the goal, then we have a solution
@@ -186,35 +192,38 @@ def neighbors_for_person(person_id):
     Returns (activities_id, person_id) pairs for people
     who starred with a given person.
     """
-    person = people[person_id]
-    if person["privacy"] == "Y":
-        print("Privacy Requested")
+    source = people[person_id]
+    source_community = source["community"]
+    source_school = source["school"]
+    source_employer = source["employer"]
+
+    if source["privacy"] == "Y":
+        print(f"Connection cannot be established, {source['name']} requested privacy")
         sys.exit(0)
     else:
-        name = person["name"]
-        if name.lower() in activities:
-            activities_ids = list(activities.get(name.lower(), set()))
-            print(f"{activities_ids}")
-            neighbors = set()
-            for activity_id in activities_ids:
-                for person_id in activities[activity_id]["stars"]:
-                    neighbors.add((activity_id, person_id))
-            return neighbors
-        else:
-            print(f"{name} has no activities")
-            sys.exit(0)
+        source_name = source["name"]
+        contacts = set()
+        for activity in activities_list:
+            persons = list(activities.get(activity, set()))
+            if source_name.lower() in persons:
+                for index in names:
+                    person_ids = list(names.get(index, set()))
+                    for person_id in person_ids:
+                        person = people[person_id]
+                        name = person["name"]
+                        community = person["community"]
+                        school = person["school"]
+                        employer = person["employer"]
+                        privacy = person["privacy"]
 
-        # if name.lower() in activities:
-        #    person_ids = list(names.get(name.lower(), set()))
-        #    for person_id in person_ids:
-        #        person = people[person_id]
-        #        activities_ids = list((activities.get(person["name"], set())))
-        #        print(f"{activities_ids}")
-        #    neighbors = set()
-        #    for activity_id in activities_ids:
-        #        for person_id in activities[name.lower()]["activity"]:
-        #            neighbors.add((activity_id, person_id))
-        #    return neighbors
+                        if source_community == community or source_school == school or source_employer == employer:
+                            if privacy != "Y":
+                                if name.lower() not in persons:
+                                    contacts.add((activities_list[activity], person_id))
+                                # print(f"Contact found: {person['name']}")
+                            # else:
+                            # print(f"{person['name']} exists")
+        return contacts
 
 
 if __name__ == "__main__":

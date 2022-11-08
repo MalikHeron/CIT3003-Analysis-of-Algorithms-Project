@@ -1,8 +1,8 @@
 import csv
 import sys
 
-from util import Node, QueueFrontier
-
+from queue import Queue
+from node import Node
 # Maps names to a set of corresponding person_ids
 names = {}
 
@@ -18,7 +18,7 @@ def load_data():
     Load data from CSV files into memory.
     """
     # Load people
-    with open("res/people.csv") as file:
+    with open("../res/people.csv") as file:
         reader = csv.DictReader(file)
         counter = 0
         for row in reader:
@@ -46,7 +46,7 @@ def load_data():
                 names[name.lower()].add(counter)
 
     # Load activities
-    with open("res/activities.csv") as file:
+    with open("../res/activities.csv") as file:
         reader = csv.DictReader(file)
         counter = 0
         for row in reader:
@@ -85,7 +85,7 @@ def main():
         sys.exit("Person not found.")
 
     # Get the path they are connected by
-    path = shortest_path(source, target)
+    path = get_shortest_path(source, target)
 
     if path is None:
         print("Not connected.")
@@ -106,55 +106,60 @@ def main():
             print(f"{i + 1}: {person1} is a close contact of {person2}")
 
 
-def shortest_path(source, target):
+def get_shortest_path(source, target):
     """
     Returns the shortest list of (person_id) that connects the source to the target.
     If no possible path, returns None.
     """
-    # Keep track of number of states explored
+    # Keep track of number of states compared
     num_explored = 0
 
-    # Initialize frontier to just the starting position
-    start = Node(state=source, parent=None, action=None)
-    frontier = QueueFrontier()
-    frontier.add(start)
+    # Initialize node
+    node = Node(person=source, next_node=None)
+    # Create object of Queue
+    queue = Queue()
+    # Add node to queue
+    queue.enqueue(node)
 
-    # Initialize an empty explored set
-    explored = set()
+    # For storing checked persons
+    checked = set()
 
-    # If both person name is same, then no solution
+    # If both persons' name is the same, then exit program
     if source == target:
         sys.exit("Same person")
 
-    # Keep looping until solution found
+    # Keep looping until a solution is found
     while True:
 
-        # If nothing left in frontier, then no path
-        if frontier.empty():
+        # If queue is empty then no path exists
+        if queue.empty():
             return None
 
-        # Choose a node from the frontier
-        node = frontier.remove()
-        num_explored += 1
+        # Get next node from the queue
+        next_node = queue.dequeue()
 
-        # Mark node as explored
-        explored.add(node.state)
+        # Mark node as compared
+        checked.add(next_node.person)
 
-        # Add neighbors to frontier
-        for state in get_contacts(node.state):
-            if not frontier.contains_state(state) and state not in explored:
-                child = Node(state=state, parent=node, action=None)
+        # Check close contacts for the next person
+        for current_person in get_contacts(next_node.person):
+            # Check if person exists in queue and if the person has been already been checked
+            if not queue.contains_person(current_person) and next_node not in checked:
+                child = Node(person=current_person, next_node=next_node)
 
-                # If node is the goal, then we have a solution
-                if child.state == target:
+                # If current node matches the target, then find and return path
+                if child.person == target:
                     node = child
                     path = []
-                    while node.parent is not None:
-                        path.append(node.state)
-                        node = node.parent
+                    while node.next_node is not None:
+                        # Add person to the path
+                        path.append(node.person)
+                        # Set node to next_node
+                        node = node.next_node
                     path.reverse()
                     return path
-                frontier.add(child)
+                # Add node back to queue
+                queue.enqueue(child)
 
 
 def get_person_id(name):

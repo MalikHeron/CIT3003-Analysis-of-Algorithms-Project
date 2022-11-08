@@ -13,20 +13,20 @@ In this section, we can see the end result of implementation by looking at how m
 ## Mandy Patinkin & Gerald R. Molen
 
 
-![](visual_demonstration/mandy_gerald.gif)
-![](visual_demonstration/mandy_gerald.png)
+![](preview/mandy_gerald.gif)
+![](preview/mandy_gerald.png)
 
 ## Jack Nicholson & Cary Elwes
 
-![](visual_demonstration/jack_cary.gif)
-![](visual_demonstration/jack_cary.png)
+![](preview/jack_cary.gif)
+![](preview/jack_cary.png)
 
 ## Gary Sinise & Tom Cruise
 
-![](visual_demonstration/gary_tom.gif)
-![](visual_demonstration/gary_tom.png)
+![](preview/gary_tom.gif)
+![](preview/gary_tom.png)
 
 ## Robin Wright & Demi Moore
 
-![](visual_demonstration/robin_demi.gif)
-![](visual_demonstration/robin_demi.png)
+![](preview/robin_demi.gif)
+![](preview/robin_demi.png)

@@ -109,10 +109,8 @@ def main():
 def get_shortest_path(source, target):
     """
     Returns the shortest list of (person_id) that connects the source to the target.
-    If no possible path, returns None.
+    If not possible path, returns None.
     """
-    # Keep track of number of states compared
-    num_explored = 0
 
     # Initialize node
     node = Node(person=source, next_node=None)
@@ -164,7 +162,7 @@ def get_shortest_path(source, target):
 
 def get_person_id(name):
     """
-    Returns the id for a person's name, resolving ambiguities as needed.
+    Returns the id for a person's name, avoiding any ambiguities.
     """
     person_ids = list(names.get(name.lower(), set()))
     if len(person_ids) == 0:

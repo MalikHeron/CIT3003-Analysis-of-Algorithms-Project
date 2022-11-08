@@ -207,7 +207,7 @@ def get_contacts(person_id):
     source_privacy = source["privacy"]
 
     # Display source name
-    print(f"Person: {source_name}")
+    print(f"\nPerson: {source_name}")
 
     # Check if source requested privacy
     if source_privacy == "Y":

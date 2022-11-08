@@ -1,7 +1,7 @@
 import csv
 import sys
 
-from util import Node, StackFrontier, QueueFrontier
+from util import Node, QueueFrontier
 
 # Maps names to a set of corresponding person_ids
 names = {}
@@ -49,7 +49,6 @@ def load_data():
     with open("res/activities.csv") as file:
         reader = csv.DictReader(file)
         counter = 0
-        activity_counter = 0
         for row in reader:
             # Increase counter
             counter += 1

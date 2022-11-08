@@ -124,7 +124,7 @@ def shortest_path(source, target):
 
     # If both person name is same, then no solution
     if source == target:
-        return []
+        sys.exit("Same person")
 
     # Keep looping until solution found
     while True:

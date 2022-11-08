@@ -97,8 +97,8 @@ def main():
         for i in range(degrees):
             person1 = people[path[i][1]]["name"]
             person2 = people[path[i + 1][1]]["name"]
-            movie = activities[path[i + 1][0]]["title"]
-            print(f"{i + 1}: {person1} and {person2} starred in {movie}")
+            # movie = activities[path[i + 1][0]]["title"]
+            print(f"{i + 1}: {person1} and {person2} share ")
 
 
 def shortest_path(source, target):
@@ -123,6 +123,8 @@ def shortest_path(source, target):
     if source == target:
         return []
 
+    counter = 0
+
     # Keep looping until solution found
     while True:
 
@@ -137,9 +139,16 @@ def shortest_path(source, target):
         # Mark node as explored
         explored.add(node.state)
 
+        counter += 1
+
+        if counter > 6:
+            print("More than 6 degrees of separation")
+            sys.exit(0)
+
         # Add neighbors to frontier
         for activity, state in neighbors_for_person(node.state):
-            if not frontier.contains_state(activity) and activity not in explored:
+            # print(f"Activity: {activity}, ID: {state}")
+            if not frontier.contains_state(state) and state not in explored:
                 child = Node(state=state, parent=node, action=activity)
 
                 # If node is the goal, then we have a solution
@@ -179,6 +188,9 @@ def person_id_for_name(name):
         try:
             person_id = int(input("Intended Person ID: "))
             if person_id in person_ids:
+                if people[person_id]["privacy"] == "Y":
+                    print(f"Connection cannot be established, {people[person_id]['name']} requested privacy")
+                    sys.exit(0)
                 return person_id
         except ValueError:
             pass
@@ -202,6 +214,7 @@ def neighbors_for_person(person_id):
         sys.exit(0)
     else:
         source_name = source["name"]
+        print(f"Person: {source_name}")
         contacts = set()
         for activity in activities_list:
             persons = list(activities.get(activity, set()))

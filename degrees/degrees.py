@@ -6,10 +6,10 @@ from util import Node, StackFrontier, QueueFrontier
 # Maps names to a set of corresponding person_ids
 names = {}
 
-# Maps person_ids to a dictionary of: name, birth, movies (a set of movie_ids)
+# Maps person_ids to a dictionary of: name, phone, email, community, school, employer, privacy
 people = {}
 
-# Maps activities to a dictionary of: names
+# Maps names to a dictionary of: activities
 activities = {}
 
 

@@ -9,9 +9,6 @@ names = {}
 # Maps person_ids to a dictionary of: name, birth, movies (a set of movie_ids)
 people = {}
 
-# Maps activities to an id
-activities_list = {}
-
 # Maps activities to a dictionary of: names
 activities = {}
 
@@ -30,6 +27,8 @@ def load_data():
 
             # Form name string
             name = row["first"] + " " + row["last"]
+
+            # Add person details to people
             people[counter] = {
                 "name": name,
                 "phone": row["phone"],
@@ -40,6 +39,7 @@ def load_data():
                 "privacy": row["privacy"]
             }
 
+            # Check if name already exists
             if name.lower() not in names:
                 names[name.lower()] = {counter}
             else:
@@ -56,13 +56,6 @@ def load_data():
 
             # Form name string
             name = row["first"] + " " + row["last"]
-
-            # Add unique activities to a list
-            if row["activity"] not in activities_list:
-                # Increase counter
-                activity_counter += 1
-
-                activities_list[row["activity"]] = activity_counter
 
             # Form list with name as key
             if name.lower() not in activities:
@@ -82,13 +75,17 @@ def main():
     load_data()
     print("Data loaded.")
 
+    # Get name of source person
     source = person_id_for_name(input("Name: "))
     if source is None:
         sys.exit("Person not found.")
+
+    # Get name of targeted person
     target = person_id_for_name(input("Name: "))
     if target is None:
         sys.exit("Person not found.")
 
+    # Get the path they are connected by
     path = shortest_path(source, target)
 
     if path is None:
@@ -96,7 +93,11 @@ def main():
     else:
         degrees = len(path)
         print(f"{degrees} degrees of separation.")
+
+        # Add source number to path array
         path = [source] + path
+
+        # Search and display how they are connected
         for i in range(degrees):
             person1 = people[path[i]]["name"]
             person2 = people[path[i + 1]]["name"]
@@ -105,9 +106,7 @@ def main():
 
 def shortest_path(source, target):
     """
-    Returns the shortest list of (activity_id, person_id) pairs
-    that connect the source to the target.
-
+    Returns the shortest list of (person_id) that connects the source to the target.
     If no possible path, returns None.
     """
     # Keep track of number of states explored
@@ -143,12 +142,13 @@ def shortest_path(source, target):
 
         counter += 1
 
+        # Check if loop runs 6 times already
         if counter > 6:
             print(f"More than 6 degrees of separation")
             sys.exit(0)
 
         # Add neighbors to frontier
-        for state in neighbors_for_person(node.state):
+        for state in contacts_for_person(node.state):
             if not frontier.contains_state(state) and state not in explored:
                 child = Node(state=state, parent=node, action=None)
 
@@ -166,8 +166,7 @@ def shortest_path(source, target):
 
 def person_id_for_name(name):
     """
-    Returns the id for a person's name,
-    resolving ambiguities as needed.
+    Returns the id for a person's name, resolving ambiguities as needed.
     """
     person_ids = list(names.get(name.lower(), set()))
     if len(person_ids) == 0:
@@ -197,18 +196,22 @@ def person_id_for_name(name):
         return person_ids[0]
 
 
-def neighbors_for_person(person_id):
+def contacts_for_person(person_id):
     """
-    Returns (activities_id, person_id) pairs for people
-    who starred with a given person.
+    Returns (person_id) for people who are close contacts with a given person.
     """
+    # Get source information
     source = people[person_id]
     source_community = source["community"]
     source_school = source["school"]
     source_employer = source["employer"]
     source_name = source["name"]
     source_privacy = source["privacy"]
+
+    # Display source name
     print(f"Person: {source_name}")
+
+    # Check if source requested privacy
     if source_privacy == "Y":
         print(f"No recommendations to close contacts, {source_name} requested privacy")
 
@@ -234,13 +237,15 @@ def neighbors_for_person(person_id):
 
                 if source_privacy != "Y":
                     if contact_privacy != "Y":
-                        for activity in source_activities:
-                            if activity not in target_activities:
-                                # print(f"Activity not in target: {activity}")
-                                if activity not in recommendations:
-                                    activity_id = activities_list.get(activity)
-                                    recommendations.append(f"{source_name} {activity}")
-                        print(f"Recommendations to {contact_name}: {recommendations}")
+                        # Check if source has activities
+                        if source_activities:
+                            for activity in source_activities:
+                                if activity not in target_activities:
+                                    if activity not in recommendations:
+                                        recommendations.append(f"{source_name} {activity}")
+                            # Check for recommendations
+                            if recommendations:
+                                print(f"Recommendations to {contact_name}: {recommendations}")
                 contacts.add(person_id)
     return contacts
 

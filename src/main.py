@@ -152,23 +152,18 @@ def get_shortest_path(source, target):
                 # If the person in the current node matches the target, then find and return path
                 if child.person == target:
                     node = child
+                    # print(f"Parent: {node.parent}")
                     path = []
                     while node.parent is not None:
                         # Add person to the path
                         path.append(node.person)
+                        # print(f"Path: {path}")
                         # Set node to parent node
                         node = node.parent
+                        # print(f"Parent: {node.parent}")
                     path.reverse()
+                    # print(f"Path reversed: {path}")
                     return path
-
-                # If person has already been checked dequeue to see if list gets empty
-                if child.person in checked:
-                    try:
-                        queue_copy = queue
-                        queue.contains_person(queue_copy.dequeue())
-                    except IndexError as e:
-                        print(e)
-                        return None
 
                 # Add node to queue
                 queue.enqueue(child)

@@ -140,7 +140,7 @@ def get_shortest_path(source, target):
         checked.add(next_node.person)
 
         # Check close contacts for the next person
-        for current_person in get_close_contacts(next_node.person):
+        for current_person in get_close_contacts(next_node.person, target):
             # Check if person exists in queue and if the person has been already been checked
             if not queue.contains_person(current_person) and next_node not in checked:
                 child = Node(person=current_person, next_node=next_node)
@@ -192,7 +192,7 @@ def get_person_id(name):
         return person_ids[0]
 
 
-def get_close_contacts(person_id):
+def get_close_contacts(person_id, target_id):
     """
     Returns (person_id) for people who are close contacts with a given person.
     """
@@ -228,8 +228,14 @@ def get_close_contacts(person_id):
             contact_privacy = person["privacy"]
 
             # Check if contact is a close contact
-            if source_community == contact_community and source_school == contact_school \
+            if source_community == contact_community or source_school == contact_school \
                     or source_employer == contact_employer:
+                # Check if target person is the current close contact
+                if people[target_id] == person:
+                    # Add current close contact
+                    close_contacts.add(person_id)
+                    return close_contacts
+
                 # For storing recommendations
                 recommendations = list()
                 # Activities source does

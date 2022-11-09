@@ -144,10 +144,8 @@ def get_shortest_path(source, target):
         for current_person in get_close_contacts(current_node.person, target):
             # Check if the current person exists in the queue
             if not queue.contains_person(current_person) and current_node.person not in checked:
+                # Create a new node on tree
                 child = Node(person=current_person, parent=current_node)
-
-                # node = child.parent
-                # print(f"Person: {child.person}, Source: {node.person}")
 
                 # If the person in the current node matches the target, then find and return path
                 if child.person == target:

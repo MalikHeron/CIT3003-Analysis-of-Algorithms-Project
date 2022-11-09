@@ -1,5 +1,5 @@
 class Node:
     # Default constructor
-    def __init__(self, person, next_node):
+    def __init__(self, person, parent):
         self.person = person
-        self.next_node = next_node
+        self.parent = parent

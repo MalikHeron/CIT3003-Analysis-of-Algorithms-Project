@@ -3,6 +3,12 @@ import sys
 
 from queue import Queue
 from node import Node
+
+""" Sources: 
+    https://github.com/priyanktejani/degrees
+    https://github.com/alireza-mahmoodi/Six_Degrees_of_Kevin_Bacon.git 
+"""
+
 # Maps names to a set of corresponding person_ids
 names = {}
 
@@ -72,7 +78,7 @@ def main():
     # Load data from files into memory
     print("Loading data...")
     load_data()
-    print("Data loaded.")
+    print("Data loaded.\n")
 
     # Get name of source person
     source = get_person_id(input("Name: "))
@@ -107,13 +113,15 @@ def main():
 
 
 def get_shortest_path(source, target):
-    """
-    Returns the shortest list of (person_id) that connects the source to the target.
-    If not possible path, returns None.
-    """
+    """ Returns the shortest list of (person_id) that connects the source to the target.
+    If not possible path, returns None. """
+
+    # If both persons' name is the same, then exit program
+    if source == target:
+        sys.exit("Same person")
 
     # Initialize node
-    node = Node(person=source, next_node=None)
+    node = Node(person=source, parent=None)
     # Create object of Queue
     queue = Queue()
     # Add node to queue
@@ -121,10 +129,6 @@ def get_shortest_path(source, target):
 
     # For storing checked persons
     checked = set()
-
-    # If both persons' name is the same, then exit program
-    if source == target:
-        sys.exit("Same person")
 
     # Keep looping until a solution is found
     while True:
@@ -134,42 +138,58 @@ def get_shortest_path(source, target):
             return None
 
         # Get next node from the queue
-        next_node = queue.dequeue()
+        current_node = queue.dequeue()
 
-        # Mark node as compared
-        checked.add(next_node.person)
+        # Check close contacts for the current node
+        for current_person in get_close_contacts(current_node.person, target):
+            # Check if the current person exists in the queue
+            if not queue.contains_person(current_person) and current_node.person not in checked:
+                child = Node(person=current_person, parent=current_node)
 
-        # Check close contacts for the next person
-        for current_person in get_close_contacts(next_node.person, target):
-            # Check if person exists in queue and if the person has been already been checked
-            if not queue.contains_person(current_person) and next_node not in checked:
-                child = Node(person=current_person, next_node=next_node)
+                # node = child.parent
+                # print(f"Person: {child.person}, Source: {node.person}")
 
-                # If current node matches the target, then find and return path
+                # If the person in the current node matches the target, then find and return path
                 if child.person == target:
                     node = child
                     path = []
-                    while node.next_node is not None:
+                    while node.parent is not None:
                         # Add person to the path
                         path.append(node.person)
-                        # Set node to next_node
-                        node = node.next_node
+                        # Set node to parent node
+                        node = node.parent
                     path.reverse()
                     return path
-                # Add node back to queue
+
+                # If person has already been checked dequeue to see if list gets empty
+                if child.person in checked:
+                    try:
+                        queue_copy = queue
+                        queue.contains_person(queue_copy.dequeue())
+                    except IndexError as e:
+                        print(e)
+                        return None
+
+                # Add node to queue
                 queue.enqueue(child)
+
+        # Add current node to checked list
+        checked.add(current_node.person)
+        # print(f"Checked: {checked}")
 
 
 def get_person_id(name):
-    """
-    Returns the id for a person's name, avoiding any ambiguities.
-    """
+    """ Returns the id for a person's name, avoiding any ambiguities. """
+    # Get list of ids for particular name
     person_ids = list(names.get(name.lower(), set()))
+
+    # Check if list is empty
     if len(person_ids) == 0:
         return None
     elif len(person_ids) > 1:
-        print(f"Which '{name}'?")
+        print(f"\nWhich '{name}'?")
         for person_id in person_ids:
+            # Get person information
             person = people[person_id]
             name = person["name"]
             phone = person["phone"]
@@ -181,38 +201,42 @@ def get_person_id(name):
 
             print(f"ID: {person_id}, Name: {name}, Phone: {phone}, Email: {email}, Community: {community}, "
                   f"School: {school}, Employer: {employer}, Privacy: {privacy}")
-        try:
-            person_id = int(input("Intended Person ID: "))
-            if person_id in person_ids:
-                return person_id
-        except ValueError:
-            pass
-        return None
+
+        # Give user 3 tries to enter correct data type
+        for tries in range(0, 3):
+            try:
+                person_id = int(input("\nIntended Person ID: "))
+                # Check if entered id is valid
+                if person_id in person_ids:
+                    return person_id
+                return None
+            except ValueError:
+                print(f"Integer value expected. Tries remaining {2 - tries}")
+                continue
+        # User has entered invalid inputs to reach this point
+        sys.exit("\nInvalid inputs!")
     else:
         return person_ids[0]
 
 
-def get_close_contacts(person_id, target_id):
-    """
-    Returns (person_id) for people who are close contacts with a given person.
-    """
+def get_close_contacts(source_id, target_id):
+    """ Returns (person_id) for people who are close contacts with a given person. """
     # Get source information
-    source = people[person_id]
+    source = people[source_id]
     source_community = source["community"]
     source_school = source["school"]
     source_employer = source["employer"]
     source_name = source["name"]
-    source_privacy = source["privacy"]
 
     # Display source name
-    print(f"\nPerson: {source_name}")
+    print(f"\nChecking close contacts for: [{source_id}] {source_name}")
 
-    # Check if source requested privacy
-    if source_privacy == "Y":
-        print(f"No recommendations to close contacts, {source_name} requested privacy")
-
+    # Storing close contacts
     close_contacts = set()
+    # Storing whether source has activities
     have_activities = bool
+
+    # Iterate through names
     for name in names:
         # Get list of ids for particular name
         person_ids = list(names.get(name, set()))
@@ -232,7 +256,7 @@ def get_close_contacts(person_id, target_id):
                     or source_employer == contact_employer:
                 # Check if target person is the current close contact
                 if people[target_id] == person:
-                    # Add current close contact
+                    # Add current close contact and stop searching
                     close_contacts.add(person_id)
                     return close_contacts
 
@@ -243,24 +267,30 @@ def get_close_contacts(person_id, target_id):
                 # Activities target does
                 target_activities = list(activities.get(contact_name.lower(), set()))
 
-                if source_privacy != "Y":
-                    if contact_privacy != "Y":
-                        # Check if source has activities
-                        if source_activities:
-                            for activity in source_activities:
-                                if activity not in target_activities:
-                                    if activity not in recommendations:
-                                        # Add activity to recommendations
-                                        recommendations.append(f"{source_name} {activity}")
-                            # Check for recommendations
-                            if recommendations:
-                                print(f"Recommendations to {contact_name}: {recommendations}")
-                        else:
-                            have_activities = False
+                # Check if contact requested privacy
+                if contact_privacy != "Y":
+                    # Check if source has activities
+                    if source_activities:
+                        # Iterate through source activities
+                        for activity in source_activities:
+                            # Check if source activities are in target activities
+                            if activity not in target_activities:
+                                # Check if activity is already in recommendation list
+                                if activity not in recommendations:
+                                    # Add activity to recommendations
+                                    recommendations.append(f"{source_name} {activity}")
+                        # Check for recommendations
+                        if recommendations:
+                            print(f"Recommendations sent to [{person_id}] {contact_name}: {recommendations}")
+                    else:
+                        # Source has no activities
+                        have_activities = False
+                else:
+                    print(f"No recommendations sent to [{person_id}] {contact_name}, privacy requested")
                 # Add contact to close contacts
                 close_contacts.add(person_id)
     if not have_activities:
-        print(f"{source_name} has no activities")
+        print(f"[{source_id}] {source_name} has no activities")
     return close_contacts
 
 

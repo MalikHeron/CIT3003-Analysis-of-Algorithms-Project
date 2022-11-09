@@ -22,7 +22,7 @@ class Queue:
     # For removing nodes from front of queue
     def dequeue(self):
         if self.is_empty():
-            raise Exception("Queue empty")
+            raise IndexError("Queue empty")
         else:
             node = self.array[0]
             # remove first object and reassign array to new list

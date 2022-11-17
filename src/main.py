@@ -1,33 +1,41 @@
 import csv
 import sys
-
+import time
 from queue import Queue
+from tkinter import *
+from tkinter import filedialog
+from tkinter import messagebox
 from node import Node
+
 # Maps names to a set of corresponding person_ids
 names = {}
-
 # Maps person_ids to a dictionary of: name, phone, email, community, school, employer, privacy
 people = {}
-
 # Maps names to a dictionary of: activities
 activities = {}
-
+#Global declarattions
+sourcefst=""
+targetfst=""
+#Main widget declaration
+root=Tk()
+root.title("RECCOMMENDATION SYTEM")
 
 def load_data():
+    global filepath
+    filepath=filedialog.askopenfilename(initialdir="../res", filetypes=(("csv","*.csv"),("all files", "*.*")))
+    label=Label(text=filepath).pack()
     """
     Load data from CSV files into memory.
     """
     # Load people
-    with open("../res/people.csv") as file:
+    with open(filepath) as file:
         reader = csv.DictReader(file)
         counter = 0
         for row in reader:
             # Increase counter
             counter += 1
-
             # Form name string
             name = row["first"] + " " + row["last"]
-
             # Add person details to people
             people[counter] = {
                 "name": name,
@@ -44,9 +52,11 @@ def load_data():
                 names[name.lower()] = {counter}
             else:
                 names[name.lower()].add(counter)
+    filepath=filedialog.askopenfilename(initialdir="../res", filetypes=(("csv","*.csv"),("all files", "*.*")))
+    
 
     # Load activities
-    with open("../res/activities.csv") as file:
+    with open(filepath) as file:
         reader = csv.DictReader(file)
         counter = 0
         for row in reader:
@@ -66,35 +76,71 @@ def load_data():
                         activities[name.lower()].add(row["activity"])
                     # else:
                     #    print(f"Duplicate: {row['activity']} at {name}")
+    load=Label(text="Loading Data...").pack()
+    root.destroy()
+    
+    
 
+
+  
 
 def main():
-    # Load data from files into memory
-    print("Loading data...")
-    load_data()
-    print("Data loaded.")
+    #start time\
+    st=time.time()
+    #main GUI WINDOWS
+    root.geometry("700x350")
+    startButton= Button(root, text="Add File", padx=50, pady=50, command=lambda: [load_data(), openentrywindow()])
+    startButton.pack()
+     
+    root.mainloop()
+    et= time.time()
+    print("The time of execution of above program is :",
+      (et-st) * 10**3, "ms")
 
+def openentrywindow():
+    entrywindow=Tk()
+    entrywindow.title("Social Connections")
+    entrywindow.geometry("700x350")
     # Get name of source person
-    source = get_person_id(input("Name: "))
+    global firstSearch
+    global targetSearch
+    firstSearch= Entry(entrywindow, width=50)
+    firstSearch.pack()
+    targetSearch= Entry(entrywindow, width=50)
+    targetSearch.pack()
+    submitbutton= Button(entrywindow, text="Search pair",command=submitnames)
+    submitbutton.pack()
+    entrywindow.wait_window(root)
+    source=get_person_id(sourcefst)
     if source is None:
-        sys.exit("Person not found.")
-
+        #sys.exit("Person not found.")
+        messagebox.showerror("Person Not found")
     # Get name of targeted person
-    target = get_person_id(input("Name: "))
+    #target = get_person_id(input("Name: "))
+    target=get_person_id(targetfst)
     if target is None:
-        sys.exit("Person not found.")
+        #sys.exit("Person not found.")
+        messagebox.showerror("Person Not found")
+
+
 
     # Get the path they are connected by
     path = get_shortest_path(source, target)
 
     if path is None:
-        print("Not connected.")
+        #print("Not connected.")
+        messagebox.showerror("Not connected")
     else:
         degrees = len(path)
         if degrees == 1:
-            print(f"\n{degrees} degree of separation.")
+            #print(f"\n{degrees} degree of separation.")
+            d1=Label(entrywindow, text={degrees})
+            d1.pack()
+
         elif degrees > 1:
-            print(f"\n{degrees} degrees of separation.")
+            #print(f"\n{degrees} degrees of separation.")
+            d1=Label(entrywindow, text={degrees})
+            d1.pack()
 
         # Add source number to path array
         path = [source] + path
@@ -105,13 +151,18 @@ def main():
             person2 = people[path[i + 1]]["name"]
             print(f"{i + 1}: {person1} is a close contact of {person2}")
 
+def submitnames():
+    global sourcefst
+    global targetfst
+    sourcefst=firstSearch.get()
+    targetfst=targetSearch.get()
 
+      
 def get_shortest_path(source, target):
     """
     Returns the shortest list of (person_id) that connects the source to the target.
     If not possible path, returns None.
     """
-
     # Initialize node
     node = Node(person=source, next_node=None)
     # Create object of Queue
@@ -256,7 +307,6 @@ def get_close_contacts(person_id):
     if not have_activities:
         print(f"{source_name} has no activities")
     return close_contacts
-
 
 if __name__ == "__main__":
     main()

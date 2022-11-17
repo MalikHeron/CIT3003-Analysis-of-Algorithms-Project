@@ -122,8 +122,6 @@ def openentrywindow():
         #sys.exit("Person not found.")
         messagebox.showerror("Person Not found")
 
-
-
     # Get the path they are connected by
     path = get_shortest_path(source, target)
 

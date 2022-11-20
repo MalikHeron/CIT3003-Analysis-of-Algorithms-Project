@@ -142,7 +142,7 @@ def get_shortest_path(source, target):
 
         # Check close contacts for the current node
         for current_person in get_close_contacts(current_node.person, target):
-            # Check if the current person exists in the queue
+            # Check if the current person exists in the set
             if not queue.contains_person(current_person) and current_node.person not in checked:
                 # Create a new node on tree
                 child = Node(person=current_person, parent=current_node)
@@ -163,7 +163,7 @@ def get_shortest_path(source, target):
                     # print(f"Path reversed: {path}")
                     return path
 
-                # Add node to queue
+                # Add child node to queue
                 queue.enqueue(child)
 
         # Add current node to checked list

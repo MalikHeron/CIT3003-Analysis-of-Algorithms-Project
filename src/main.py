@@ -93,10 +93,14 @@ def main():
 
     # Get the path and average of the connection
     result = find_connection(source, target)
-    # Get path value
-    path = result[0]
-    # Get average value
-    average = round(result[1], 3)
+    try:
+        # Get path value
+        path = result[0]
+        # Get average value
+        average = round(result[1], 3)
+    except TypeError:
+        path = None
+        average = 0
 
     if path is None:
         print("Not connected.")
@@ -133,12 +137,10 @@ def find_connection(source, target):
     queue = Queue()
     # Add node to queue
     queue.enqueue(node)
-    # For finding the average separation
-    average = 0.0
     # Keeping track of the number of similar contacts
     similar_contacts = 0
-    # Keep track of number of child nodes
-    child_count = 0
+    # For storing sum of averages
+    total_average = 0.0
 
     # For storing checked persons
     checked = set()
@@ -153,7 +155,7 @@ def find_connection(source, target):
         # Get next node from the queue
         current_node = queue.dequeue()
         # Reset child count on loop
-        # child_count = 0
+        child_count = 0
         # Get current person name
         source = people[current_node.person]
         source_name = source["name"]
@@ -179,9 +181,12 @@ def find_connection(source, target):
                         # print(f"Parent: {node.parent}")
                     path.reverse()
                     # print(f"Path reversed: {path}")
-                    # Calculate average
-                    average = log(20000) / log(child_count)
-                    return path, average
+                    try:
+                        # Calculate final average
+                        final_average = total_average / len(checked)
+                        return path, final_average
+                    except ZeroDivisionError:
+                        return path, 1
 
                 # Add child node to queue
                 queue.enqueue(child)
@@ -190,6 +195,15 @@ def find_connection(source, target):
 
         # Add current node to checked list
         checked.add(current_node.person)
+        try:
+            # Calculate average separation
+            average = log(len(people)) / log(child_count)
+        except ValueError:
+            average = 0
+        except ZeroDivisionError:
+            average = 0
+        # Total average separation
+        total_average += average
         # print(f"Close contacts: {child_count}")
         # print(f"Similar contacts: {similar_contacts}")
         # print(f"Average separation: {average}")

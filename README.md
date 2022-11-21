@@ -8,7 +8,7 @@ This project is based on implementations from https://github.com/priyanktejani/d
 
 # The Code in Action
 
-In this section, we can see the end result of implementation by looking at how many degrees of separation these actors are from each other.
+In this section, we can see the end result of implementation by looking at how many degrees of separation two actors are from each other.
 
 ## Yvonne Dennis & Lamaro Hall
 

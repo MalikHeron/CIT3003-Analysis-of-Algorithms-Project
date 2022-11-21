@@ -10,7 +10,7 @@ This project is based on implementations from https://github.com/priyanktejani/d
 
 In this section, we can see the end result of implementation by looking at how many degrees of separation two actors are from each other.
 
-## Yvonne Dennis & Lamaro Hall
+## Yvonne Dennis & Jason Hall
 
 
 ![](preview/sample_run_1.gif)

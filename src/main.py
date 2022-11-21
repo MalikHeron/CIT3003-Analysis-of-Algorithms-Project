@@ -91,8 +91,8 @@ def main():
     if target is None:
         sys.exit("Person not found.")
 
-    # Get the path they are connected by
-    objects = get_shortest_path(source, target)
+    # Get the path and average of the connection
+    objects = find_connection(source, target)
     # Get path object
     path = objects[0]
     # Get average
@@ -119,7 +119,7 @@ def main():
         print(f"\nAverage degrees of separation: {average}")
 
 
-def get_shortest_path(source, target):
+def find_connection(source, target):
     """ Returns the shortest list of (person_id) that connects the source to the target.
     If not possible path, returns None. """
 

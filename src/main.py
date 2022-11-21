@@ -92,11 +92,11 @@ def main():
         sys.exit("Person not found.")
 
     # Get the path and average of the connection
-    objects = find_connection(source, target)
-    # Get path object
-    path = objects[0]
-    # Get average
-    average = round(objects[1], 3)
+    result = find_connection(source, target)
+    # Get path value
+    path = result[0]
+    # Get average value
+    average = round(result[1], 3)
 
     if path is None:
         print("Not connected.")
@@ -120,7 +120,7 @@ def main():
 
 
 def find_connection(source, target):
-    """ Returns the shortest list of (person_id) that connects the source to the target.
+    """ Returns the list of (person_id) that connects the source to the target.
     If not possible path, returns None. """
 
     # If both persons' name is the same, then exit program

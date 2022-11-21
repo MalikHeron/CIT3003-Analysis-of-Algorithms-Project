@@ -8,25 +8,17 @@ This project is based on implementations from https://github.com/priyanktejani/d
 
 # The Code in Action
 
-In this section, we can see the end result of implementation by looking at how many degrees of separation these actors are from each other.
+In this section, we can see the end result of implementation by looking at how many degrees of separation two actors are from each other.
 
-## Mandy Patinkin & Gerald R. Molen
+## Yvonne Dennis & Lamaro Hall
 
 
-![](preview/mandy_gerald.gif)
-![](preview/mandy_gerald.png)
+![](preview/sample_run_1.gif)
 
-## Jack Nicholson & Cary Elwes
+## Lawrence Smith & Oshaine Williams
 
-![](preview/jack_cary.gif)
-![](preview/jack_cary.png)
+![](preview/sample_run_2.gif)
 
-## Gary Sinise & Tom Cruise
+## Lorna Jennings & Kenroy Johnson
 
-![](preview/gary_tom.gif)
-![](preview/gary_tom.png)
-
-## Robin Wright & Demi Moore
-
-![](preview/robin_demi.gif)
-![](preview/robin_demi.png)
+![](preview/sample_run_3.gif)

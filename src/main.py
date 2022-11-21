@@ -1,6 +1,7 @@
 import csv
 import sys
 
+from math import log
 from queue import Queue
 from node import Node
 
@@ -91,7 +92,11 @@ def main():
         sys.exit("Person not found.")
 
     # Get the path they are connected by
-    path = get_shortest_path(source, target)
+    objects = get_shortest_path(source, target)
+    # Get path object
+    path = objects[0]
+    # Get average
+    average = round(objects[1], 3)
 
     if path is None:
         print("Not connected.")
@@ -111,6 +116,8 @@ def main():
             person2 = people[path[i + 1]]["name"]
             print(f"{i + 1}: {person1} is a close contact of {person2}")
 
+        print(f"\nAverage degrees of separation: {average}")
+
 
 def get_shortest_path(source, target):
     """ Returns the shortest list of (person_id) that connects the source to the target.
@@ -126,6 +133,12 @@ def get_shortest_path(source, target):
     queue = Queue()
     # Add node to queue
     queue.enqueue(node)
+    # For finding the average separation
+    average = 0.0
+    # Keeping track of the number of similar contacts
+    similar_contacts = 0
+    # Keep track of number of child nodes
+    child_count = 0
 
     # For storing checked persons
     checked = set()
@@ -139,6 +152,11 @@ def get_shortest_path(source, target):
 
         # Get next node from the queue
         current_node = queue.dequeue()
+        # Reset child count on loop
+        # child_count = 0
+        # Get current person name
+        source = people[current_node.person]
+        source_name = source["name"]
 
         # Check close contacts for the current node
         for current_person in get_close_contacts(current_node.person, target):
@@ -146,7 +164,7 @@ def get_shortest_path(source, target):
             if not queue.contains_person(current_person) and current_node.person not in checked:
                 # Create a new node on tree
                 child = Node(person=current_person, parent=current_node)
-
+                child_count += 1
                 # If the person in the current node matches the target, then find and return path
                 if child.person == target:
                     node = child
@@ -161,14 +179,21 @@ def get_shortest_path(source, target):
                         # print(f"Parent: {node.parent}")
                     path.reverse()
                     # print(f"Path reversed: {path}")
-                    return path
+                    # Calculate average
+                    average = log(20000) / log(child_count)
+                    return path, average
 
                 # Add child node to queue
                 queue.enqueue(child)
+            else:
+                similar_contacts += 1
 
         # Add current node to checked list
         checked.add(current_node.person)
-        # print(f"Checked: {checked}")
+        # print(f"Close contacts: {child_count}")
+        # print(f"Similar contacts: {similar_contacts}")
+        # print(f"Average separation: {average}")
+        # print(f"Checked: {source_name}")
 
 
 def get_person_id(name):

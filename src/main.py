@@ -10,6 +10,15 @@ from node import Node
     https://github.com/alireza-mahmoodi/Six_Degrees_of_Kevin_Bacon.git 
 """
 
+"""
+Title: CIT3003 Group Project
+Date: November 21, 2022,
+Members:
+    Ackeem McLennon 1803349
+    Malik Heron 2001158
+    Shawn Grant 2002432
+    Tyreque Hibbert 2005320
+"""
 # Maps names to a set of corresponding person_ids
 names = {}
 
